@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小屋名の小屋 商品企画</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --surface: #ffffff;
+    --surface2: #f0f2f5;
+    --border: #e2e6ed;
+    --text: #1a2030;
+    --muted: #8a94a6;
+    --accent: #2563eb;
+    --accent-soft: rgba(37,99,235,0.08);
+    --green: #059669;
+    --green-soft: rgba(5,150,105,0.08);
+    --yellow: #d97706;
+    --yellow-soft: rgba(217,119,6,0.08);
+    --red: #dc2626;
+    --red-soft: rgba(220,38,38,0.08);
+    --purple: #7c3aed;
+    --purple-soft: rgba(124,58,237,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 var(--border);
+  }
+
+  .logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .stat-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); }
+
+  /* Main */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  /* Controls */
+  .controls {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search {
+    flex: 1;
+    min-width: 200px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search:focus { border-color: var(--accent); }
+  .search::placeholder { color: var(--muted); }
+
+  select.filter {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  select.filter:focus { border-color: var(--accent); }
+
+  .btn-new {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .btn-new:hover { opacity: 0.85; }
+  .btn-new:active { transform: scale(0.97); }
+
+  /* Table */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--surface2);
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    cursor: pointer;
+    animation: fadeIn 0.3s ease both;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  td {
+    padding: 14px 20px;
+    vertical-align: middle;
+  }
+
+  .case-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .case-id {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Status badge */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .badge-未着手 { background: var(--purple-soft); color: var(--purple); }
+  .badge-未着手::before { background: var(--purple); }
+  .badge-進行中 { background: var(--accent-soft); color: var(--accent); }
+  .badge-進行中::before { background: var(--accent); animation: pulse 1.5s ease infinite; }
+  .badge-レビュー中 { background: var(--yellow-soft); color: var(--yellow); }
+  .badge-レビュー中::before { background: var(--yellow); }
+  .badge-完了 { background: var(--green-soft); color: var(--green); }
+  .badge-完了::before { background: var(--green); }
+  .badge-保留 { background: var(--red-soft); color: var(--red); }
+  .badge-保留::before { background: var(--red); }
+
+  /* Print badge */
+  .print-badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    min-width: 80px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+    width: fit-content;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-radius: 7px;
+    padding: 8px 20px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #fff;
+  }
+  .tab-btn:not(.active):hover { color: var(--text); background: var(--surface2); }
+
+  /* Gantt / Calendar */
+  .gantt-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .gantt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .gantt-header-title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .gantt-nav {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .gantt-nav button {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .gantt-nav button:hover { border-color: var(--accent); color: var(--accent); }
+  .gantt-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .gantt-body {
+    overflow-x: auto;
+  }
+
+  .gantt-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+  }
+
+  .gantt-table .col-name {
+    width: 200px;
+    min-width: 200px;
+  }
+
+  .gantt-month-header th {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  .gantt-month-header th.col-name {
+    color: var(--muted);
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .gantt-week-header th {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    padding: 5px 0;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+    text-align: center;
+    white-space: nowrap;
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+  }
+  .gantt-week-header th.col-name {
+    text-align: left;
+    padding: 5px 12px;
+  }
+  .gantt-week-header th.today-col {
+    color: var(--accent);
+    font-weight: 700;
+    background: var(--accent-soft);
+  }
+
+  .gantt-row {
+    border-bottom: 1px solid var(--border);
+  }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-row:hover .gantt-name-cell { background: var(--surface2); }
+
+  .gantt-name-cell {
+    padding: 10px 12px;
+    border-right: 2px solid var(--border);
+    vertical-align: middle;
+    background: var(--surface);
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+  .gantt-row-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .gantt-row-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .gantt-cell {
+    border-right: 1px solid var(--border);
+    padding: 0;
+    height: 52px;
+    vertical-align: middle;
+    position: relative;
+    overflow: visible;
+    width: 28px;
+    min-width: 28px;
+    max-width: 28px;
+  }
+  .gantt-cell.today-col {
+    background: rgba(37,99,235,0.04);
+  }
+  .gantt-cell.month-end {
+    border-right: 2px solid var(--border);
+  }
+
+  .gantt-bar {
+    height: 22px;
+    border-radius: 4px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    min-width: 4px;
+    cursor: pointer;
+    transition: opacity 0.15s, filter 0.15s;
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    overflow: visible;
+  }
+  .gantt-bar:hover { filter: brightness(0.88); }
+  .gantt-bar:hover .phase-marker-label { opacity: 1; }
+  .gantt-bar-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* deadline marker */
+  .gantt-deadline {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--red);
+    opacity: 0.7;
+  }
+
+  /* today line */
+  .today-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .gantt-empty {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  /* ガント フェーズマーカー */
+  .phase-marker {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: auto;
+    cursor: default;
+    z-index: 10;
+  }
+  .phase-marker-diamond {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border: 2px solid rgba(0,0,0,0.35);
+    border-radius: 2px;
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+  .phase-marker-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(0,0,0,0.5);
+    padding: 1px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    pointer-events: none;
+  }
+
+  .deadline {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  .deadline.overdue { color: var(--red); }
+  .deadline.soon { color: var(--yellow); }
+  .deadline.ok { color: var(--muted); }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  tbody tr:hover .actions { opacity: 1; }
+
+  .btn-icon {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    font-size: 13px;
+  }
+  .btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-icon.delete:hover { border-color: var(--red); color: var(--red); }
+
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,32,48,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 100%;
+    max-width: 520px;
+    transform: translateY(12px);
+    transition: transform 0.2s;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  }
+  .modal-overlay.open .modal {
+    transform: translateY(0);
+  }
+
+  .modal h2 {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .progress-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-input-wrap input[type=range] {
+    flex: 1;
+    accent-color: var(--accent);
+    padding: 0;
+    height: auto;
+    background: none;
+    border: none;
+  }
+  .progress-input-wrap span {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    min-width: 36px;
+    text-align: right;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 28px;
+  }
+  .btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--text); color: var(--text); }
+  .btn-save {
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    padding: 10px 24px;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  /* フェーズ別期限 */
+  .phase-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .phase-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: border-color 0.15s;
+  }
+  .phase-row:focus-within {
+    border-color: var(--accent);
+  }
+  .phase-label {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+  .phase-date {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* テーブル内フェーズ表示 */
+  .phase-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .phase-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .phase-name {
+    color: var(--muted);
+    min-width: 90px;
+  }
+  .phase-date-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+  .phase-date-val.overdue { color: var(--red); font-weight: 600; }
+  .phase-date-val.soon { color: var(--yellow); font-weight: 600; }
+  .phase-date-val.ok { color: var(--text); }
+  .phase-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .btn-save:hover { opacity: 0.85; }
+
+  /* 完了セクション折りたたみ */
+  .done-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .done-toggle:hover { background: #e8edf4; }
+  .done-toggle-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .done-toggle-count {
+    background: var(--green-soft);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .done-toggle-arrow {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .done-toggle-arrow.open { transform: rotate(180deg); }
+
+  .done-rows tr {
+    opacity: 0.6;
+  }
+  .done-rows tr:hover { opacity: 1; }
+  .done-rows .case-name { text-decoration: line-through; color: var(--muted); }
+  .completed-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">小屋名の小屋 商品企画</div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-num" id="statTotal" style="color:var(--text)">0</div>
+      <div class="stat-label">全案件</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statActive" style="color:var(--accent)">0</div>
+      <div class="stat-label">進行中</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statDone" style="color:var(--green)">0</div>
+      <div class="stat-label">完了</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="statOver" style="color:var(--red)">0</div>
+      <div class="stat-label">期限超過</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabList" onclick="switchTab('list')">📋 一覧</button>
+    <button class="tab-btn" id="tabGantt" onclick="switchTab('gantt')">📅 カレンダー</button>
+  </div>
+
+  <!-- 一覧ビュー -->
+  <div id="viewList">
+  <div class="controls">
+    <input class="search" type="text" id="searchInput" placeholder="案件名・担当者で検索...">
+    <select class="filter" id="statusFilter">
+      <option value="">すべてのステータス</option>
+      <option>未着手</option>
+      <option>進行中</option>
+      <option>レビュー中</option>
+      <option>完了</option>
+      <option>保留</option>
+    </select>
+    <select class="filter" id="sortFilter">
+      <option value="deadline">期限順</option>
+      <option value="name">案件名順</option>
+      <option value="progress">進捗順</option>
+      <option value="status">ステータス順</option>
+    </select>
+    <button class="btn-new" onclick="openModal()">＋ 新規案件</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>案件名</th>
+          <th>デザイン担当</th>
+          <th>営業担当</th>
+          <th>ステータス</th>
+          <th>印刷</th>
+          <th>進捗</th>
+          <th>フェーズ別期限</th>
+          <th>完了日</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="emptyMsg" style="display:none">案件がありません。新規案件を追加してください。</div>
+  </div>
+  </div>
+
+  <!-- カレンダー（ガント）ビュー -->
+  <div id="viewGantt" style="display:none">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+      <button class="btn-new" onclick="openModal()">＋ 新規案件</button>
+    </div>
+    <div class="gantt-wrap">
+      <div class="gantt-header">
+        <div class="gantt-header-title">案件スケジュール（3ヶ月表示）</div>
+        <div class="gantt-nav">
+          <button onclick="ganttMove(-3)">‹‹</button>
+          <button onclick="ganttMove(-1)">‹</button>
+          <div class="gantt-period" id="ganttPeriod"></div>
+          <button onclick="ganttMove(1)">›</button>
+          <button onclick="ganttMove(3)">››</button>
+          <button onclick="ganttToday()" style="width:auto;padding:0 10px;font-size:12px;">今日</button>
+        </div>
+      </div>
+      <div class="gantt-body">
+        <div id="ganttContent"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeOnOverlay(event)">
+  <div class="modal">
+    <h2 id="modalTitle">新規案件</h2>
+    <div class="form-group">
+      <label>案件名 *</label>
+      <input type="text" id="fName" placeholder="例：Webサイトリニューアル">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>デザイン担当</label>
+        <select id="fOwner">
+          <option value="">— 未選択 —</option>
+          <option>竹田</option>
+          <option>後藤</option>
+          <option>宇留野</option>
+          <option>神谷</option>
+          <option>藤井</option>
+          <option>岡本</option>
+          <option>伊藤</option>
+          <option>國光</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>営業担当</label>
+        <select id="fSales">
+          <option value="">— 未選択 —</option>
+          <option>渡辺</option>
+          <option>多和田</option>
+          <option>伊藤</option>
+          <option>井上</option>
+          <option>猿渡</option>
+          <option>木島</option>
+          <option>酒向</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>ステータス</label>
+        <select id="fStatus">
+          <option>未着手</option>
+          <option>進行中</option>
+          <option>レビュー中</option>
+          <option>完了</option>
+          <option>保留</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>印刷</label>
+        <select id="fPrint">
+          <option value="">— 未選択 —</option>
+          <option>オフセット</option>
+          <option>オンデマンド</option>
+          <option>シール</option>
+          <option>外注</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>フェーズ別期限</label>
+      <div class="phase-grid">
+        <div class="phase-row">
+          <span class="phase-label">デザイン入稿</span>
+          <input type="date" id="fDl1" class="phase-date">
+        </div>
+        <div class="phase-row">
+          <span class="phase-label">デザイン初校</span>
+          <input type="date" id="fDl2" class="phase-date">
+        </div>
+        <div class="phase-row">
+          <span class="phase-label">デザイン校了</span>
+          <input type="date" id="fDl3" class="phase-date">
+        </div>
+        <div class="phase-row">
+          <span class="phase-label">印刷加工仕上がり</span>
+          <input type="date" id="fDl4" class="phase-date">
+        </div>
+        <div class="phase-row">
+          <span class="phase-label">セットアップ</span>
+          <input type="date" id="fDl5" class="phase-date">
+        </div>
+        <div class="phase-row" style="border-color: var(--green); background: var(--green-soft);">
+          <span class="phase-label" style="color:var(--green);font-weight:600;">完了日</span>
+          <input type="date" id="fDl6" class="phase-date">
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>進捗</label>
+      <div class="progress-input-wrap">
+        <input type="range" id="fProgress" min="0" max="100" value="0" oninput="document.getElementById('fProgressVal').textContent=this.value+'%'">
+        <span id="fProgressVal">0%</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>メモ</label>
+      <textarea id="fNote" placeholder="備考・メモ..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-save" onclick="saveCase()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let cases = JSON.parse(localStorage.getItem('cases') || '[]');
+let editId = null;
+
+// Sample data if empty
+if (!cases.length) {
+  cases = [
+    { id: 'C-001', name: 'コーポレートサイト刷新', owner: '竹田', sales: '渡辺', status: '進行中', progress: 60, dl1: '2026-02-28', dl2: '2026-03-05', dl3: '2026-03-10', dl4: '2026-03-15', dl5: '2026-03-20', note: 'デザイン確認中' },
+    { id: 'C-002', name: 'ECシステム移行', owner: '後藤', sales: '多和田', status: 'レビュー中', progress: 85, dl1: '2026-02-20', dl2: '2026-02-25', dl3: '2026-03-01', dl4: '2026-03-08', dl5: '2026-03-15', note: 'QA完了待ち' },
+    { id: 'C-003', name: 'モバイルアプリ開発', owner: '神谷', sales: '井上', status: '未着手', progress: 0, dl1: '2026-04-01', dl2: '', dl3: '', dl4: '2026-05-15', dl5: '2026-05-31', note: '' },
+    { id: 'C-004', name: '社内ポータル構築', owner: '藤井', sales: '猿渡', status: '完了', progress: 100, dl1: '2026-01-10', dl2: '2026-01-15', dl3: '2026-01-20', dl4: '2026-01-28', dl5: '2026-01-31', completedAt: '2026-01-28', note: '納品済み' },
+    { id: 'C-005', name: 'データ分析基盤整備', owner: '岡本', sales: '木島', status: '保留', progress: 30, dl1: '2026-03-20', dl2: '', dl3: '2026-04-10', dl4: '2026-04-25', dl5: '2026-04-30', note: '予算承認待ち' },
+  ];
+  save();
+}
+
+function save() {
+  localStorage.setItem('cases', JSON.stringify(cases));
+}
+
+let doneExpanded = false;
+
+function render() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const statusF = document.getElementById('statusFilter').value;
+  const sortF = document.getElementById('sortFilter').value;
+
+  // 完了以外
+  let active = cases.filter(c => {
+    if (c.status === '完了') return false;
+    const matchS = !statusF || c.status === statusF;
+    const matchQ = !search || c.name.toLowerCase().includes(search) || (c.owner||'').toLowerCase().includes(search);
+    return matchS && matchQ;
+  });
+
+  // 完了
+  let done = cases.filter(c => {
+    if (c.status !== '完了') return false;
+    if (statusF && statusF !== '完了') return false;
+    const matchQ = !search || c.name.toLowerCase().includes(search) || (c.owner||'').toLowerCase().includes(search);
+    return matchQ;
+  });
+
+  const getEarliestDl = c => ['dl1','dl2','dl3','dl4','dl5','dl6'].map(k => c[k]).filter(Boolean).sort()[0] || '9999';
+
+  const statusOrder = { '保留':0, '未着手':1, '進行中':2, 'レビュー中':3 };
+  active.sort((a, b) => {
+    if (sortF === 'name') return a.name.localeCompare(b.name, 'ja');
+    if (sortF === 'progress') return b.progress - a.progress;
+    if (sortF === 'status') return (statusOrder[a.status]||0) - (statusOrder[b.status]||0);
+    return getEarliestDl(a) > getEarliestDl(b) ? 1 : -1;
+  });
+
+  // 完了は完了日の新しい順
+  done.sort((a, b) => (b.completedAt || '0') > (a.completedAt || '0') ? 1 : -1);
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const soon = new Date(today); soon.setDate(soon.getDate() + 7);
+
+  const allEmpty = active.length === 0 && done.length === 0;
+  document.getElementById('emptyMsg').style.display = allEmpty ? 'block' : 'none';
+
+  function phaseClass(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr); d.setHours(0,0,0,0);
+    if (d < today) return 'overdue';
+    if (d <= soon) return 'soon';
+    return 'ok';
+  }
+  function phaseColor(cls) {
+    if (cls === 'overdue') return 'var(--red)';
+    if (cls === 'soon') return 'var(--yellow)';
+    return 'var(--border)';
+  }
+
+  const PHASES = [
+    { key: 'dl1', label: 'デザイン入稿' },
+    { key: 'dl2', label: '初校' },
+    { key: 'dl3', label: '校了' },
+    { key: 'dl4', label: '印刷仕上がり' },
+    { key: 'dl5', label: 'セットアップ' },
+    { key: 'dl6', label: '完了日', isCompletion: true },
+  ];
+
+  function makeRow(c, i, isDone) {
+    // フェーズ別期限表示
+    const phaseHtml = PHASES.map(p => {
+      const val = c[p.key];
+      if (!val) return '';
+      const cls = p.isCompletion ? 'ok' : (isDone ? 'ok' : phaseClass(val));
+      const txt = val.replace(/-/g, '/');
+      const dotColor = p.isCompletion ? 'var(--green)' : phaseColor(cls);
+      const textColor = p.isCompletion ? 'var(--green)' : '';
+      return `<div class="phase-item">
+        <span class="phase-dot" style="background:${dotColor}"></span>
+        <span class="phase-name" style="${p.isCompletion ? 'color:var(--green);font-weight:600;' : ''}">${p.label}</span>
+        <span class="phase-date-val ${p.isCompletion ? '' : cls}" style="${p.isCompletion ? 'color:var(--green);font-weight:600;' : ''}">${txt}</span>
+      </div>`;
+    }).join('');
+
+    // 次の直近期限（ソート・ガント用）
+    const nextDeadline = PHASES.map(p => c[p.key]).filter(Boolean).sort()[0] || null;
+
+    const progColor = isDone ? 'var(--green)' : c.progress >= 80 ? 'var(--green)' : c.progress >= 40 ? 'var(--accent)' : 'var(--purple)';
+    const completedTd = isDone
+      ? `<td><span class="completed-date">✓ ${c.completedAt ? c.completedAt.replace(/-/g,'/') : '—'}</span></td>`
+      : `<td><span style="color:var(--muted);font-size:12px">—</span></td>`;
+
+    const tr = document.createElement('tr');
+    tr.style.animationDelay = (i * 20) + 'ms';
+    tr.innerHTML = `
+      <td>
+        <div class="case-name">${esc(c.name)}</div>
+        <div class="case-id">${esc(c.id)}</div>
+      </td>
+      <td>${esc(c.owner || '—')}</td>
+      <td>${esc(c.sales || '—')}</td>
+      <td><span class="badge badge-${c.status}">${c.status}</span></td>
+      <td>${c.print ? `<span class="print-badge">${esc(c.print)}</span>` : '<span style="color:var(--muted);font-size:12px">—</span>'}</td>
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${c.progress}%;background:${progColor}"></div></div>
+          <span class="progress-num">${c.progress}%</span>
+        </div>
+      </td>
+      <td><div class="phase-list">${phaseHtml || '<span style="color:var(--muted);font-size:12px">—</span>'}</div></td>
+      ${completedTd}
+      <td>
+        <div class="actions">
+          <button class="btn-icon" onclick="openModal('${c.id}')" title="編集">✎</button>
+          <button class="btn-icon delete" onclick="deleteCase('${c.id}')" title="削除">✕</button>
+        </div>
+      </td>
+    `;
+    return tr;
+  }
+
+  // アクティブ案件を描画
+  active.forEach((c, i) => tbody.appendChild(makeRow(c, i, false)));
+
+  // 完了セクション
+  if (done.length > 0 && !statusF) {
+    // 区切り行（トグルボタン）
+    const toggleTr = document.createElement('tr');
+    toggleTr.innerHTML = `<td colspan="9" style="padding:0;">
+      <div class="done-toggle" onclick="toggleDone()" id="doneToggle">
+        <span class="done-toggle-label">完了済み案件</span>
+        <span class="done-toggle-count">${done.length}件</span>
+        <span class="done-toggle-arrow ${doneExpanded ? 'open' : ''}" id="doneArrow">▼</span>
+      </div>
+    </td>`;
+    tbody.appendChild(toggleTr);
+
+    // 完了行（折りたたみ）
+    const doneTbody = document.createElement('tbody');
+    doneTbody.id = 'doneTbody';
+    doneTbody.className = 'done-rows';
+    doneTbody.style.display = doneExpanded ? '' : 'none';
+    done.forEach((c, i) => doneTbody.appendChild(makeRow(c, i, true)));
+    tbody.parentElement.insertBefore(doneTbody, tbody.nextSibling);
+  }
+
+  // Stats
+  document.getElementById('statTotal').textContent = cases.length;
+  document.getElementById('statActive').textContent = cases.filter(c => c.status === '進行中').length;
+  document.getElementById('statDone').textContent = cases.filter(c => c.status === '完了').length;
+  document.getElementById('statOver').textContent = cases.filter(c => {
+    if (!c.deadline || c.status === '完了') return false;
+    return new Date(c.deadline) < today;
+  }).length;
+}
+
+function toggleDone() {
+  doneExpanded = !doneExpanded;
+  const tb = document.getElementById('doneTbody');
+  const arrow = document.getElementById('doneArrow');
+  if (tb) tb.style.display = doneExpanded ? '' : 'none';
+  if (arrow) arrow.classList.toggle('open', doneExpanded);
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function openModal(id = null) {
+  editId = id;
+  document.getElementById('modalTitle').textContent = id ? '案件を編集' : '新規案件';
+  if (id) {
+    const c = cases.find(x => x.id === id);
+    document.getElementById('fName').value = c.name;
+    document.getElementById('fOwner').value = c.owner || '';
+    document.getElementById('fSales').value = c.sales || '';
+    document.getElementById('fStatus').value = c.status;
+    document.getElementById('fPrint').value = c.print || '';
+    document.getElementById('fDl1').value = c.dl1 || '';
+    document.getElementById('fDl2').value = c.dl2 || '';
+    document.getElementById('fDl3').value = c.dl3 || '';
+    document.getElementById('fDl4').value = c.dl4 || '';
+    document.getElementById('fDl5').value = c.dl5 || '';
+    document.getElementById('fDl6').value = c.dl6 || '';
+    document.getElementById('fProgress').value = c.progress;
+    document.getElementById('fProgressVal').textContent = c.progress + '%';
+    document.getElementById('fNote').value = c.note || '';
+  } else {
+    document.getElementById('fName').value = '';
+    document.getElementById('fOwner').value = '';
+    document.getElementById('fSales').value = '';
+    document.getElementById('fStatus').value = '未着手';
+    document.getElementById('fPrint').value = '';
+    document.getElementById('fDl1').value = '';
+    document.getElementById('fDl2').value = '';
+    document.getElementById('fDl3').value = '';
+    document.getElementById('fDl4').value = '';
+    document.getElementById('fDl5').value = '';
+    document.getElementById('fDl6').value = '';
+    document.getElementById('fProgress').value = 0;
+    document.getElementById('fProgressVal').textContent = '0%';
+    document.getElementById('fNote').value = '';
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('fName').focus();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeOnOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function saveCase() {
+  const name = document.getElementById('fName').value.trim();
+  if (!name) { document.getElementById('fName').focus(); return; }
+  const data = {
+    name,
+    owner: document.getElementById('fOwner').value,
+    sales: document.getElementById('fSales').value,
+    status: document.getElementById('fStatus').value,
+    print: document.getElementById('fPrint').value,
+    dl1: document.getElementById('fDl1').value,
+    dl2: document.getElementById('fDl2').value,
+    dl3: document.getElementById('fDl3').value,
+    dl4: document.getElementById('fDl4').value,
+    dl5: document.getElementById('fDl5').value,
+    dl6: document.getElementById('fDl6').value,
+    progress: parseInt(document.getElementById('fProgress').value),
+    note: document.getElementById('fNote').value.trim(),
+  };
+
+  // 完了日の自動セット
+  if (data.status === '完了') {
+    if (editId) {
+      const prev = cases.find(x => x.id === editId);
+      // 前が完了でなければ今日の日付をセット
+      data.completedAt = prev && prev.completedAt ? prev.completedAt : new Date().toISOString().split('T')[0];
+    } else {
+      data.completedAt = new Date().toISOString().split('T')[0];
+    }
+    data.progress = 100;
+  } else {
+    data.completedAt = null;
+  }
+  if (editId) {
+    const i = cases.findIndex(x => x.id === editId);
+    cases[i] = { ...cases[i], ...data };
+  } else {
+    const num = String(cases.length + 1).padStart(3, '0');
+    data.id = 'C-' + num;
+    cases.unshift(data);
+  }
+  save();
+  closeModal();
+  render();
+  if (document.getElementById('viewGantt').style.display !== 'none') renderGantt();
+}
+
+function deleteCase(id) {
+  if (!confirm('この案件を削除しますか？')) return;
+  cases = cases.filter(c => c.id !== id);
+  save();
+  render();
+  if (document.getElementById('viewGantt').style.display !== 'none') renderGantt();
+}
+
+document.getElementById('searchInput').addEventListener('input', render);
+document.getElementById('statusFilter').addEventListener('change', render);
+document.getElementById('sortFilter').addEventListener('change', render);
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ---- Tab ----
+function switchTab(tab) {
+  document.getElementById('tabList').classList.toggle('active', tab === 'list');
+  document.getElementById('tabGantt').classList.toggle('active', tab === 'gantt');
+  document.getElementById('viewList').style.display = tab === 'list' ? '' : 'none';
+  document.getElementById('viewGantt').style.display = tab === 'gantt' ? '' : 'none';
+  if (tab === 'gantt') renderGantt();
+}
+
+// ---- Gantt ----
+let ganttStartMonth = null; // { year, month } 0-indexed
+
+function ganttToday() {
+  const now = new Date();
+  ganttStartMonth = { year: now.getFullYear(), month: now.getMonth() };
+  renderGantt();
+}
+
+function ganttMove(delta) {
+  if (!ganttStartMonth) ganttToday();
+  let m = ganttStartMonth.month + delta;
+  let y = ganttStartMonth.year;
+  while (m < 0) { m += 12; y--; }
+  while (m > 11) { m -= 12; y++; }
+  ganttStartMonth = { year: y, month: m };
+  renderGantt();
+}
+
+function renderGantt() {
+  if (!ganttStartMonth) {
+    const now = new Date();
+    ganttStartMonth = { year: now.getFullYear(), month: now.getMonth() };
+  }
+
+  const { year: sy, month: sm } = ganttStartMonth;
+  const months = [0,1,2].map(i => {
+    let m = sm + i, y = sy;
+    if (m > 11) { m -= 12; y++; }
+    return { year: y, month: m };
+  });
+
+  // Period label
+  const mNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  const first = months[0], last = months[2];
+  document.getElementById('ganttPeriod').textContent =
+    `${first.year}年${mNames[first.month]} 〜 ${last.year}年${mNames[last.month]}`;
+
+  // Build days array
+  const days = [];
+  months.forEach(({ year, month }) => {
+    const dim = new Date(year, month + 1, 0).getDate();
+    for (let d = 1; d <= dim; d++) {
+      days.push({ year, month, day: d, date: new Date(year, month, d) });
+    }
+  });
+
+  const totalDays = days.length;
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Status colors
+  const statusColors = {
+    '未着手': '#7c3aed',
+    '進行中': '#2563eb',
+    'レビュー中': '#d97706',
+    '完了': '#059669',
+    '保留': '#dc2626',
+  };
+
+  // Build table HTML
+  let html = `<table class="gantt-table">`;
+
+  // Month header row
+  html += `<thead><tr class="gantt-month-header"><th class="col-name">案件名</th>`;
+  months.forEach(({ year, month }) => {
+    const dim = new Date(year, month + 1, 0).getDate();
+    html += `<th colspan="${dim}">${mNames[month]}</th>`;
+  });
+  html += `</tr>`;
+
+  // Day header row
+  html += `<tr class="gantt-week-header"><th class="col-name">担当者</th>`;
+  const dayNames = ['日','月','火','水','木','金','土'];
+  days.forEach(({ year, month, day, date }, idx) => {
+    const isToday = date.getTime() === today.getTime();
+    const dow = date.getDay();
+    const isMonthEnd = idx < days.length - 1 && days[idx+1].month !== month;
+    let cls = '';
+    if (isToday) cls += ' today-col';
+    html += `<th class="${cls}" style="${dow===0?'color:var(--red)':dow===6?'color:var(--accent)':''};${isMonthEnd?'border-right:2px solid var(--border)':''}">${day}</th>`;
+  });
+  html += `</tr></thead><tbody>`;
+
+  // Case rows
+  const activeCases = cases.filter(c => c.dl1 || c.dl2 || c.dl3 || c.dl4 || c.dl5 || c.dl6);
+  if (!activeCases.length) {
+    html += `<tr><td colspan="${totalDays+1}" class="gantt-empty">期限が設定された案件がありません</td></tr>`;
+  }
+
+  // Also show cases without deadline (greyed)
+  cases.forEach(c => {
+    const color = statusColors[c.status] || '#8a94a6';
+    // フェーズ期限からstart/endを計算
+    const phaseDates = ['dl1','dl2','dl3','dl4','dl5','dl6'].map(k => c[k]).filter(Boolean).sort();
+    const cStart = phaseDates[0] || null;
+    const cEnd = phaseDates[phaseDates.length - 1] || null;
+
+    html += `<tr class="gantt-row">`;
+    html += `<td class="gantt-name-cell">
+      <div class="gantt-row-name" title="${c.name}">${c.name}</div>
+      <div class="gantt-row-sub">${c.owner || '—'} · <span class="badge badge-${c.status}" style="padding:1px 6px;font-size:10px;">${c.status}</span></div>
+    </td>`;
+
+    days.forEach(({ date, month }, idx) => {
+      const isToday = date.getTime() === today.getTime();
+      const isMonthEnd = idx < days.length - 1 && days[idx+1].month !== month;
+      let cellCls = 'gantt-cell';
+      if (isToday) cellCls += ' today-col';
+      if (isMonthEnd) cellCls += ' month-end';
+
+      html += `<td class="${cellCls}">`;
+
+      if (cStart && cEnd) {
+        const startDate = new Date(cStart); startDate.setHours(0,0,0,0);
+        const dlDate = new Date(cEnd); dlDate.setHours(0,0,0,0);
+
+        if (date >= startDate && date <= dlDate) {
+          const isFirst = (date.getTime() === startDate.getTime()) ||
+            (idx === 0 && startDate < days[0].date);
+          const isLast = date.getTime() === dlDate.getTime();
+
+          if (isFirst) {
+            const barStartIdx = Math.max(0, days.findIndex(d => d.date.getTime() === startDate.getTime()));
+            const barEndIdx = days.findIndex(d => d.date.getTime() === dlDate.getTime());
+            const actualEnd = barEndIdx >= 0 ? barEndIdx : days.length - 1;
+            const cellCount = (actualEnd - barStartIdx + 1);
+            const widthPct = (cellCount / totalDays) * 100;
+            html += `<div class="gantt-bar" style="left:2px;width:calc(${widthPct}% * ${totalDays} / 1 - 4px);background:${color};opacity:0.85;" title="${c.name} - ${c.progress}% 完了">
+              <div style="position:absolute;left:0;top:0;bottom:0;width:${c.progress}%;background:rgba(255,255,255,0.25);border-radius:4px;"></div>
+              <span class="gantt-bar-label">${c.name}</span>
+            </div>`;
+          }
+          if (isLast) {
+            html += `<div class="gantt-deadline" style="right:0;"></div>`;
+          }
+        }
+      }
+
+      html += `</td>`;
+    });
+
+    html += `</tr>`;
+  });
+
+  html += `</tbody></table>`;
+  document.getElementById('ganttContent').innerHTML = html;
+
+  // Fix bar widths using actual pixel positions after render
+  fixGanttBars();
+}
+
+function fixGanttBars() {
+  const table = document.querySelector('.gantt-table');
+  if (!table) return;
+  const rows = table.querySelectorAll('.gantt-row');
+  if (!rows.length) return;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const statusColors = {
+    '未着手': '#7c3aed', '進行中': '#2563eb', 'レビュー中': '#d97706', '完了': '#059669', '保留': '#dc2626',
+  };
+
+  const PHASE_DEFS = [
+    { key: 'dl1', short: '入稿' },
+    { key: 'dl2', short: '初校' },
+    { key: 'dl3', short: '校了' },
+    { key: 'dl4', short: '仕上がり' },
+    { key: 'dl5', short: 'SET UP' },
+    { key: 'dl6', short: '完了日' },
+  ];
+
+  const headerCells = table.querySelectorAll('.gantt-week-header th');
+  if (headerCells.length < 2) return;
+  const cellWidth = 28; // 固定幅で統一
+
+  const dayHeaders = Array.from(headerCells).slice(1);
+
+  // セルインデックス → 実際の日付 マッピングを事前構築
+  const { year: sy, month: sm } = ganttStartMonth;
+  const months3 = [0,1,2].map(i => { let m=sm+i,y=sy; while(m>11){m-=12;y++;} return {year:y,month:m}; });
+  const cellDates = dayHeaders.map((hCell, idx) => {
+    const dayNum = parseInt(hCell.textContent);
+    if (!dayNum) return null;
+    let dayCount = 0;
+    for (const {year, month} of months3) {
+      const dim = new Date(year, month+1, 0).getDate();
+      if (idx < dayCount + dim) {
+        const d = new Date(year, month, dayNum);
+        d.setHours(0,0,0,0);
+        return d;
+      }
+      dayCount += dim;
+    }
+    return null;
+  });
+
+  cases.forEach((c, ci) => {
+    const row = rows[ci];
+    if (!row) return;
+    const cells = row.querySelectorAll('.gantt-cell');
+    cells.forEach(cell => { cell.querySelectorAll('.gantt-bar,.gantt-deadline,.phase-marker').forEach(el => el.remove()); });
+
+    const phaseDates = PHASE_DEFS.map(p => c[p.key]).filter(Boolean).sort();
+    if (!phaseDates.length) return;
+
+    const startDate = new Date(phaseDates[0]); startDate.setHours(0,0,0,0);
+    const endDate = new Date(phaseDates[phaseDates.length-1]); endDate.setHours(0,0,0,0);
+    const color = statusColors[c.status] || '#8a94a6';
+
+    // バーの開始・終了セルを探す
+    let barStartCell = -1, barEndCell = -1;
+    cellDates.forEach((cd, idx) => {
+      if (!cd) return;
+      if (cd >= startDate && cd <= endDate) {
+        if (barStartCell === -1) barStartCell = idx;
+        barEndCell = idx;
+      }
+    });
+    if (barStartCell === -1) return;
+
+    const startCell = cells[barStartCell];
+    if (!startCell) return;
+
+    // バー本体を描画
+    const barWidth = (barEndCell - barStartCell + 1) * cellWidth - 4;
+    const bar = document.createElement('div');
+    bar.className = 'gantt-bar';
+    bar.style.cssText = `left:2px;width:${barWidth}px;background:${color};opacity:0.9;`;
+    bar.title = c.name;
+    bar.innerHTML = `
+      <div style="position:absolute;left:0;top:0;bottom:0;width:${c.progress}%;background:rgba(255,255,255,0.22);border-radius:4px;"></div>
+      <span class="gantt-bar-label" style="padding-left:8px;">${c.name}</span>
+    `;
+    bar.onclick = () => openModal(c.id);
+    startCell.appendChild(bar);
+
+    // 各フェーズのマーカーをバー上に描画
+    PHASE_DEFS.forEach(p => {
+      if (!c[p.key]) return;
+      const phaseDate = new Date(c[p.key]); phaseDate.setHours(0,0,0,0);
+
+      // このフェーズが画面内にあるか
+      const markerIdx = cellDates.findIndex(cd => cd && cd.getTime() === phaseDate.getTime());
+      if (markerIdx === -1) return;
+      const markerCell = cells[markerIdx];
+      if (!markerCell) return;
+
+      // バー開始セルからの相対ピクセル位置を計算
+      const relativeX = (markerIdx - barStartCell) * cellWidth + cellWidth / 2;
+
+      const marker = document.createElement('div');
+      marker.className = 'phase-marker';
+      // バー内に絶対位置で配置
+      marker.style.cssText = `left:${relativeX}px;`;
+      marker.innerHTML = `
+        <div class="phase-marker-diamond"></div>
+        <span class="phase-marker-label">${p.short}</span>
+      `;
+      bar.appendChild(marker);
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
